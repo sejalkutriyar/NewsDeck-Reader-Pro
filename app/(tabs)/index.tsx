@@ -3,7 +3,7 @@ import { SafeAreaView, FlatList, Text } from "react-native";
 import { useRouter } from "expo-router";
 import ArticleCard from "../../components/ArticleCard";
 import { articles } from "../../utils/mockData";
-import { FeedStyles } from "../styles/FeedStyles";
+import { FeedStyles } from "@/app/styles/FeedStyles";
 
 export default function FeedScreen() {
   const router = useRouter();
