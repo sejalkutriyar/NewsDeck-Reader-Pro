@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
 
+
 export const FeedStyles = StyleSheet.create({
   container: {
     flex: 1,

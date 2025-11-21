@@ -1,9 +1,11 @@
 import React from "react";
-import { SafeAreaView, FlatList, Text } from "react-native";
+import { FlatList, Text } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import ArticleCard from "../../components/ArticleCard";
-import { articles } from "../../utils/mockData";
-import { FeedStyles } from "@/app/styles/FeedStyles";
+import ArticleCard from "@/components/ArticleCard";
+import { articles } from "@/utils/mockData";
+import { getSavedArticles } from "@/utils/storage";
+import { FeedStyles } from "@/styles/FeedStyles";
 
 export default function FeedScreen() {
   const router = useRouter();

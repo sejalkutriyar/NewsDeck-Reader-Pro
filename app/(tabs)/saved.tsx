@@ -1,25 +1,18 @@
-import React, { useState, useCallback } from 'react';
-import { View, Text, FlatList, StyleSheet, Pressable, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useFocusEffect } from '@react-navigation/native';
-import ArticleCard from '../../components/ArticleCard';
-import { getSavedArticles, removeArticle } from '../../utils/storage';
+import React, { useState, useCallback } from "react";
+import { View, Text, FlatList, StyleSheet, Pressable, Alert } from "react-native";
+import { useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
+import ArticleCard from "../../components/ArticleCard";
+import { getSavedArticles, removeArticle } from "../../utils/storage";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SavedScreen() {
   const router = useRouter();
   const [savedArticles, setSavedArticles] = useState<any[]>([]);
-  const [refreshing, setRefreshing] = useState(false);
 
   const loadSaved = async () => {
-    setRefreshing(true);
-    try {
-      const data = await getSavedArticles();
-      setSavedArticles(data);
-    } catch (err) {
-      console.log('Load saved error', err);
-    } finally {
-      setRefreshing(false);
-    }
+    const data = await getSavedArticles();
+    setSavedArticles(data);
   };
 
   useFocusEffect(
@@ -29,16 +22,14 @@ export default function SavedScreen() {
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={styles.heading}>❤️ Saved Articles</Text>
 
       <FlatList
         data={savedArticles}
-        keyExtractor={(item) => item.id.toString()}
-        refreshing={refreshing}
-        onRefresh={loadSaved}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <>
+          <View style={{ marginBottom: 12 }}>
             <ArticleCard
               title={item.title}
               description={item.description}
@@ -46,32 +37,31 @@ export default function SavedScreen() {
               onPress={() => router.push(`/article/${item.id}`)}
             />
 
-            {/* Remove Button */}
             <Pressable
               style={styles.deleteBtn}
-              onPress={() => {
-                Alert.alert('Remove', 'Remove this saved article?', [
-                  { text: 'Cancel', style: 'cancel' },
+              onPress={() =>
+                Alert.alert("Remove", "Delete this saved article?", [
+                  { text: "Cancel", style: "cancel" },
                   {
-                    text: 'Remove',
-                    style: 'destructive',
+                    text: "Remove",
+                    style: "destructive",
                     onPress: async () => {
-                      await removeArticle(item.id.toString());
+                      await removeArticle(item.id);
                       loadSaved();
                     },
                   },
-                ]);
-              }}
+                ])
+              }
             >
-              <Text style={{ color: 'white', textAlign: 'center', fontWeight: '600' }}>🗑 Remove</Text>
+              <Text style={styles.deleteText}>🗑 Remove</Text>
             </Pressable>
-          </>
+          </View>
         )}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No Saved Articles 😕</Text>
+          <Text style={styles.emptyText}>No Saved Articles Yet 😕</Text>
         }
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -79,23 +69,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#fff',
   },
   heading: {
     fontSize: 26,
-    fontWeight: '700',
+    fontWeight: "700",
     marginBottom: 16,
+    color: "#2C3E50",
   },
   emptyText: {
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 40,
     fontSize: 18,
-    color: 'gray',
+    color: "gray",
   },
   deleteBtn: {
-    backgroundColor: '#222',
-    marginTop: 8,
-    padding: 10,
+    marginTop: 6,
+    backgroundColor: "#e63946",
+    paddingVertical: 10,
     borderRadius: 6,
+    alignItems: "center",
+  },
+  deleteText: {
+    color: "#fff",
+    fontWeight: "600",
   },
 });

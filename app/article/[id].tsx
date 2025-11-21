@@ -2,8 +2,8 @@ import React, { useEffect } from 'react';
 import { View, Text, Image, Pressable, Alert } from 'react-native';
 import * as Speech from 'expo-speech';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { articles as mockData } from '../../utils/mockData';
-import { saveArticle } from '../../utils/storage';
+import { articles as mockData } from '@/utils/mockData';
+import { saveArticle } from '@/utils/storage';
 
 export default function ArticleDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -13,7 +13,8 @@ export default function ArticleDetailsScreen() {
 
   const speak = () => Speech.speak(article?.description || '');
 
-  useEffect(() => {
+
+  useEffect(()  => {
     return () => Speech.stop();
   }, []);
 
