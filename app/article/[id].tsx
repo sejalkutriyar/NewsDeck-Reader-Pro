@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, Image, Pressable } from 'react-native';
+import { View, Text, Image, Pressable, Alert } from 'react-native';
 import * as Speech from 'expo-speech';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { articles as mockData } from '../../utils/mockData';
@@ -27,9 +27,7 @@ export default function ArticleDetailsScreen() {
         {article.title}
       </Text>
 
-      <Text style={{ marginBottom: 20 }}>
-        {article.description.repeat(3)}
-      </Text>
+      <Text style={{ marginBottom: 20 }}>{article.description}</Text>
 
       <Pressable
         onPress={speak}
@@ -39,15 +37,22 @@ export default function ArticleDetailsScreen() {
       </Pressable>
 
       <Pressable
-        onPress={() => {
-          saveArticle(article);
-          alert("Saved! ❤️");
+        onPress={async () => {
+          try {
+            const ok = await saveArticle(article);
+            if (ok) {
+              Alert.alert('Saved', 'Article saved ❤️');
+            } else {
+              Alert.alert('Info', 'Article already saved');
+            }
+          } catch (err) {
+            console.log('Save error', err);
+            Alert.alert('Error', 'Could not save article');
+          }
         }}
         style={{ backgroundColor: 'crimson', padding: 12, borderRadius: 8, marginBottom: 10 }}
       >
-        <Text style={{ color: '#fff', textAlign: 'center', fontWeight: '600' }}>
-          ❤️ SAVE ARTICLE
-        </Text>
+        <Text style={{ color: '#fff', textAlign: 'center', fontWeight: '600' }}>❤️ SAVE ARTICLE</Text>
       </Pressable>
 
       <Pressable

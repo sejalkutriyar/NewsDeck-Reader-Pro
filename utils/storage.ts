@@ -7,13 +7,18 @@ export async function saveArticle(article: any) {
     const stored = await AsyncStorage.getItem(STORAGE_KEY);
     const existing = stored ? JSON.parse(stored) : [];
 
-    const alreadySaved = existing.find((item: any) => item.id === article.id);
-    if (alreadySaved) return; // avoid duplicates
+    // Normalize id to string to keep comparisons consistent
+    const normalized = { ...article, id: article.id?.toString() };
 
-    existing.push(article);
+    const alreadySaved = existing.find((item: any) => item.id === normalized.id);
+    if (alreadySaved) return false; // avoid duplicates
+
+    existing.push(normalized);
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
+    return true;
   } catch (err) {
     console.log("Save Error: ", err);
+    return false;
   }
 }
 
