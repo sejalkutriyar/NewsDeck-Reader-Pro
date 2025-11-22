@@ -1,5 +1,6 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import React from "react";
+import { View, Text, Image, Pressable, StyleSheet } from "react-native";
+import { useTheme } from "@/theme/ThemeContext";
 
 interface ArticleCardProps {
   title: string;
@@ -8,32 +9,65 @@ interface ArticleCardProps {
   onPress?: () => void;
 }
 
-export default function ArticleCard({ title, description = '', imageUrl, onPress }: ArticleCardProps) {
-  const safeDescription = String(description || '');
-  const preview = safeDescription.length > 80 ? `${safeDescription.substring(0, 80)}...` : safeDescription;
+export default function ArticleCard({
+  title,
+  description = "",
+  imageUrl,
+  onPress,
+}: ArticleCardProps) {
+  const { theme } = useTheme();
+
+  const safeDescription = String(description || "");
+  const preview =
+    safeDescription.length > 80
+      ? safeDescription.substring(0, 80) + "..."
+      : safeDescription;
 
   return (
-    <TouchableOpacity
+    <Pressable
+      style={[styles.card, { backgroundColor: theme.card }]}
       onPress={onPress}
-      style={{
-        backgroundColor: '#fff',
-        marginBottom: 14,
-        borderRadius: 10,
-        overflow: 'hidden',
-        elevation: 3,
-        shadowColor: '#000',
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-      }}
     >
-      {imageUrl ? (
-        <Image source={{ uri: imageUrl }} style={{ width: '100%', height: 180 }} />
-      ) : null}
+      {imageUrl && (
+        <Image source={{ uri: imageUrl }} style={styles.image} />
+      )}
 
-      <View style={{ padding: 10 }}>
-        <Text style={{ fontSize: 18, fontWeight: '700' }}>{title}</Text>
-        <Text style={{ marginTop: 5, color: '#555' }}>{preview}</Text>
+      <View style={styles.content}>
+        <Text style={[styles.title, { color: theme.text }]}>
+          {title}
+        </Text>
+        <Text style={[styles.desc, { color: theme.secondaryText }]}>
+          {preview}
+        </Text>
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    borderRadius: 12,
+    overflow: "hidden",
+    marginBottom: 16,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+  },
+  image: {
+    width: "100%",
+    height: 160,
+  },
+  content: {
+    padding: 12,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 6,
+  },
+  desc: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
+});

@@ -1,22 +1,26 @@
 import React from "react";
-import { FlatList, Text } from "react-native";
+import { FlatList, Text, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useTheme } from "@/theme/ThemeContext";
 import ArticleCard from "@/components/ArticleCard";
 import { articles } from "@/utils/mockData";
-import { getSavedArticles } from "@/utils/storage";
-import { FeedStyles } from "@/styles/FeedStyles";
 
 export default function FeedScreen() {
   const router = useRouter();
+  const { theme } = useTheme();
 
   return (
-    <SafeAreaView style={FeedStyles.container}>
-      <Text style={FeedStyles.heading}>NewsDeck Feed</Text>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <Text style={[styles.heading, { color: theme.text }]}>
+        NewsDeck Feed
+      </Text>
 
       <FlatList
         data={articles}
         keyExtractor={(item) => item.id.toString()}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 80 }}
         renderItem={({ item }) => (
           <ArticleCard
             title={item.title}
@@ -29,3 +33,12 @@ export default function FeedScreen() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 16 },
+  heading: {
+    fontSize: 28,
+    fontWeight: "700",
+    marginBottom: 20,
+  },
+});

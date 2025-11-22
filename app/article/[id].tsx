@@ -1,70 +1,137 @@
 import React, { useEffect } from 'react';
-import { View, Text, Image, Pressable, Alert } from 'react-native';
+import { View, Text, Image, ScrollView, Pressable, Share } from 'react-native';
 import * as Speech from 'expo-speech';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { articles as mockData } from '@/utils/mockData';
-import { saveArticle } from '@/utils/storage';
+import { articles as mockData } from '@utils/mockData';
+import { saveArticle } from '@utils/storage';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ArticleDetailsScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
 
-  const article = mockData.find((item) => item.id.toString() === id?.toString());
+  const article = mockData.find((item) => item.id.toString() === id);
 
-  const speak = () => Speech.speak(article?.description || '');
+  const speak = () => {
+    Speech.speak(article?.description || "");
+  };
 
+  const stopSpeak = () => {
+    Speech.stop();
+  };
 
-  useEffect(()  => {
-    return () => Speech.stop();
+  const shareArticle = async () => {
+    try {
+      await Share.share({
+        message: `${article?.title}\n\n${article?.description}`,
+      });
+    } catch (error) {
+      console.log("Share error: ", error);
+    }
+  };
+
+  useEffect(() => {
+    return () => Speech.stop(); // stop speaking when leaving screen
   }, []);
 
   if (!article) return <Text>Article Not Found</Text>;
 
   return (
-    <View style={{ padding: 16 }}>
-      <Image source={{ uri: article.imageUrl }} style={{ width: '100%', height: 200, borderRadius: 10 }} />
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+      <ScrollView contentContainerStyle={{ padding: 16 }}>
+        
+        <Image
+          source={{ uri: article.imageUrl }}
+          style={{ width: "100%", height: 250, borderRadius: 12 }}
+        />
 
-      <Text style={{ fontSize: 22, fontWeight: 'bold', marginVertical: 12 }}>
-        {article.title}
-      </Text>
+        <Text style={{ fontSize: 28, fontWeight: "800", marginVertical: 12, color: "#1A1A1A" }}>
+          {article.title}
+        </Text>
 
-      <Text style={{ marginBottom: 20 }}>{article.description}</Text>
+        <Text style={{ fontSize: 16, color: "#333", lineHeight: 24 }}>
+          {article.description.repeat(6)}
+        </Text>
 
-      <Pressable
-        onPress={speak}
-        style={{ backgroundColor: 'green', padding: 12, borderRadius: 8, marginBottom: 10 }}
+        {/* Buttons */}
+        <View style={{ height: 60 }} />
+      </ScrollView>
+
+      {/* Floating Buttons */}
+      <View
+        style={{
+          position: "absolute",
+          bottom: 25,
+          right: 20,
+          gap: 12,
+        }}
       >
-        <Text style={{ color: '#fff', textAlign: 'center' }}>🔊 SPEAK</Text>
-      </Pressable>
+        {/* Speak Button */}
+        <Pressable
+          onPress={speak}
+          style={{
+            width: 55,
+            height: 55,
+            borderRadius: 50,
+            backgroundColor: "#007BFF",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text style={{ fontSize: 22, color: "#fff" }}>🔊</Text>
+        </Pressable>
 
-      <Pressable
-        onPress={async () => {
-          try {
+        {/* Save Button */}
+        <Pressable
+          onPress={async () => {
             const ok = await saveArticle(article);
-            if (ok) {
-              Alert.alert('Saved', 'Article saved ❤️');
-            } else {
-              Alert.alert('Info', 'Article already saved');
-            }
-          } catch (err) {
-            console.log('Save error', err);
-            Alert.alert('Error', 'Could not save article');
-          }
-        }}
-        style={{ backgroundColor: 'crimson', padding: 12, borderRadius: 8, marginBottom: 10 }}
-      >
-        <Text style={{ color: '#fff', textAlign: 'center', fontWeight: '600' }}>❤️ SAVE ARTICLE</Text>
-      </Pressable>
+            alert(ok ? "Saved ❤️" : "Already Saved ✔");
+          }}
+          style={{
+            width: 55,
+            height: 55,
+            borderRadius: 50,
+            backgroundColor: "crimson",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text style={{ fontSize: 22, color: "#fff" }}>❤️</Text>
+        </Pressable>
 
-      <Pressable
-        onPress={() => {
-          Speech.stop();
-          router.back();
-        }}
-        style={{ backgroundColor: '#007bff', padding: 12, borderRadius: 8 }}
-      >
-        <Text style={{ color: '#fff', textAlign: 'center' }}>⬅ BACK</Text>
-      </Pressable>
-    </View>
+        {/* Share Button */}
+        <Pressable
+          onPress={shareArticle}
+          style={{
+            width: 55,
+            height: 55,
+            borderRadius: 50,
+            backgroundColor: "#222",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text style={{ fontSize: 22, color: "#fff" }}>📤</Text>
+        </Pressable>
+
+        {/* Back Button */}
+        <Pressable
+          onPress={() => {
+            stopSpeak();
+            router.back();
+          }}
+          style={{
+            width: 55,
+            height: 55,
+            borderRadius: 50,
+            backgroundColor: "#444",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text style={{ fontSize: 20, color: "#fff" }}>⬅</Text>
+        </Pressable>
+      </View>
+    </SafeAreaView>
   );
 }
