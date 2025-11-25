@@ -22,6 +22,7 @@ export async function saveArticle(article: any) {
   }
 }
 
+
 export async function getSavedArticles() {
   const stored = await AsyncStorage.getItem(STORAGE_KEY);
   return stored ? JSON.parse(stored) : [];
@@ -33,3 +34,4 @@ export async function removeArticle(id: string) {
   const filtered = existing.filter((item: any) => item.id !== id);
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
 }
+

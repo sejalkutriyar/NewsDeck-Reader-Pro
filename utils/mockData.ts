@@ -17,4 +17,5 @@ export const articles = [
     description: "EV adoption hits a new milestone this year...",
     imageUrl: "https://picsum.photos/402",
   },
+  
 ];
