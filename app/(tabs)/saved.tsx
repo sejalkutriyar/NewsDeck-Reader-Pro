@@ -27,14 +27,14 @@ export default function SavedScreen() {
 
       <FlatList
         data={savedArticles}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => item.article_id || item.id || index.toString()}
         renderItem={({ item }) => (
           <View style={{ marginBottom: 12 }}>
             <ArticleCard
               title={item.title}
               description={item.description}
-              imageUrl={item.imageUrl}
-              onPress={() => router.push(`/article/${item.id}`)}
+              imageUrl={item.image_url || item.imageUrl}
+              onPress={() => router.push({ pathname: '/article/[id]', params: { id: item.article_id || item.id, article: JSON.stringify(item) } })}
             />
 
             <Pressable
@@ -46,7 +46,7 @@ export default function SavedScreen() {
                     text: "Remove",
                     style: "destructive",
                     onPress: async () => {
-                      await removeArticle(item.id);
+                      await removeArticle(item.article_id || item.id);
                       loadSaved();
                     },
                   },

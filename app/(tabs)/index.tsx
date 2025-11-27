@@ -1,61 +1,98 @@
-import React, { useState, useMemo } from "react";
-import { FlatList, Text, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import { FlatList, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/theme/ThemeContext";
+
 import ArticleCard from "@/components/ArticleCard";
 import SearchBar from "@/components/SearchBar";
-import { articles } from "@/utils/mockData";
 
+import { fetchNews } from "@/utils/newsApi";
+
+interface Article {
+  title: string;
+  description: string;
+  image_url: string;
+  article_id: string;
+  [key: string]: any;
+}
 
 export default function FeedScreen() {
   const router = useRouter();
   const { theme } = useTheme();
 
+  const [news, setNews] = useState<Article[]>([]);        // 🔥 API data here
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  // Optimized filtering
-  const filteredArticles = useMemo(() => {
-    if (!search.trim()) return articles;
+  // Fetch API on screen load
+  useEffect(() => {
+    async function loadNews() {
+      setLoading(true);
+      const data = await fetchNews();
+      setNews(data || []);
+      setLoading(false);
+    }
+    loadNews();
+  }, []);
 
-    return articles.filter((item) =>
-      item.title.toLowerCase().includes(search.toLowerCase()) ||
-      item.description.toLowerCase().includes(search.toLowerCase())
-    );
-  }, [search]);
+  // Filter logic
+  const filteredArticles = news.filter((item) =>
+    (item.title || "").toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background, padding: 16 }}>
-      <Text style={[styles.heading, { color: theme.text }]}>NewsDeck Feed</Text>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.background }]}
+    >
+      <Text style={[styles.heading, { color: theme.text }]}>
+        NewsDeck Feed
+      </Text>
 
-      <SearchBar value={search} onChange={setSearch} />
-
-      <FlatList
-        data={filteredArticles}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <ArticleCard
-            title={item.title}
-            description={item.description}
-            imageUrl={item.imageUrl}
-            onPress={() => router.push(`/article/${item.id}`)}
-          />
-        )}
-        ListEmptyComponent={
-          <Text style={{ textAlign: "center", color: theme.secondaryText }}>
-            No articles found ❌
-          </Text>
-        }
+      {/* 🔍 Search Bar */}
+      <SearchBar
+        value={search}
+        onChange={setSearch}
+        placeholder="Search articles..."
       />
+
+      {/* // Loading Indicator */}
+      {loading ? (
+        <ActivityIndicator size="large" color={theme.text} style={{ marginTop: 50 }} />
+      ) : (
+        <FlatList
+          data={filteredArticles}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item, index }) => (
+            <ArticleCard
+              title={item.title}
+              description={item.description}
+              imageUrl={item.image_url}
+              onPress={() => router.push({ pathname: '/article/[id]', params: { id: item.article_id || index, article: JSON.stringify(item) } })}
+            />
+          )}
+          ListEmptyComponent={
+            <Text
+              style={{
+                color: theme.secondaryText,
+                textAlign: "center",
+                marginTop: 50,
+              }}
+            >
+              No articles found ❌
+            </Text>
+          }
+        />
+      )}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: { flex: 1, padding: 16 },
   heading: {
     fontSize: 28,
     fontWeight: "700",
-    marginBottom: 20,
+    marginBottom: 16,
   },
 });

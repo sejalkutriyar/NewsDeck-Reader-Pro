@@ -3,23 +3,23 @@ import { View, TextInput, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/theme/ThemeContext";
 
-interface Props {
+interface SearchBarProps {
   value: string;
   onChange: (text: string) => void;
+  placeholder?: string;
 }
 
-export default function SearchBar({ value, onChange }: Props) {
+export default function SearchBar({ value, onChange, placeholder }: SearchBarProps) {
   const { theme } = useTheme();
 
   return (
     <View style={[styles.container, { backgroundColor: theme.card }]}>
-      <Ionicons name="search" size={22} color={theme.secondaryText} />
-
+      <Ionicons name="search" size={20} color={theme.text} />
       <TextInput
-        placeholder="Search articles..."
-        placeholderTextColor={theme.secondaryText}
         value={value}
         onChangeText={onChange}
+        placeholder={placeholder}
+        placeholderTextColor={theme.secondaryText}
         style={[styles.input, { color: theme.text }]}
       />
     </View>
@@ -29,15 +29,15 @@ export default function SearchBar({ value, onChange }: Props) {
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
+    padding: 12,
     borderRadius: 12,
-    marginBottom: 16,
-    height: 48,
+    alignItems: "center",
+    marginBottom: 12,
+    elevation: 2,
   },
   input: {
+    marginLeft: 10,
     flex: 1,
-    marginLeft: 8,
     fontSize: 16,
   },
 });

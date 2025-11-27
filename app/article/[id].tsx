@@ -1,19 +1,29 @@
-import React, { useEffect } from 'react';
-import { View, Text, Image, ScrollView, Pressable, Share } from 'react-native';
-import * as Speech from 'expo-speech';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { articles as mockData } from '@utils/mockData';
-import { saveArticle } from '@utils/storage';
+import React, { useEffect } from "react";
+import { View, Text, Image, ScrollView, Pressable, Share } from "react-native";
+import * as Speech from "expo-speech";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { saveArticle } from "@/utils/storage";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ArticleDetailsScreen() {
-  const { id } = useLocalSearchParams();
+  const { article } = useLocalSearchParams();
   const router = useRouter();
 
-  const article = mockData.find((item) => item.id.toString() === id);
+  // stop TTS when leaving screen - must be called before early return
+  useEffect(() => {
+    return () => {
+      Speech.stop();
+    };
+  }, []);
+
+  if (!article) return <Text>No Article Found</Text>;
+
+  // parse incoming article from FeedScreen
+  const articleStr = typeof article === 'string' ? article : article[0];
+  const data = JSON.parse(articleStr);
 
   const speak = () => {
-    Speech.speak(article?.description || "");
+    Speech.speak(data?.description || "");
   };
 
   const stopSpeak = () => {
@@ -23,37 +33,43 @@ export default function ArticleDetailsScreen() {
   const shareArticle = async () => {
     try {
       await Share.share({
-        message: `${article?.title}\n\n${article?.description}`,
+        message: `${data?.title}\n\n${data?.description}`,
       });
     } catch (error) {
       console.log("Share error: ", error);
     }
   };
 
-  useEffect(() => {
-    return () => Speech.stop(); // stop speaking when leaving screen
-  }, []);
-
-  if (!article) return <Text>Article Not Found</Text>;
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <ScrollView contentContainerStyle={{ padding: 16 }}>
-        
-        <Image
-          source={{ uri: article.imageUrl }}
-          style={{ width: "100%", height: 250, borderRadius: 12 }}
-        />
+        {data.image_url && (
+          <Image
+            source={{ uri: data.image_url }}
+            style={{
+              width: "100%",
+              height: 250,
+              borderRadius: 12,
+              backgroundColor: "#ccc",
+            }}
+          />
+        )}
 
-        <Text style={{ fontSize: 28, fontWeight: "800", marginVertical: 12, color: "#1A1A1A" }}>
-          {article.title}
+        <Text
+          style={{
+            fontSize: 28,
+            fontWeight: "800",
+            marginVertical: 12,
+            color: "#1A1A1A",
+          }}
+        >
+          {data.title}
         </Text>
 
         <Text style={{ fontSize: 16, color: "#333", lineHeight: 24 }}>
-          {article.description.repeat(6)}
+          {data.description}
         </Text>
 
-        {/* Buttons */}
         <View style={{ height: 60 }} />
       </ScrollView>
 
@@ -66,7 +82,7 @@ export default function ArticleDetailsScreen() {
           gap: 12,
         }}
       >
-        {/* Speak Button */}
+        {/* Speak */}
         <Pressable
           onPress={speak}
           style={{
@@ -81,10 +97,10 @@ export default function ArticleDetailsScreen() {
           <Text style={{ fontSize: 22, color: "#fff" }}>🔊</Text>
         </Pressable>
 
-        {/* Save Button */}
+        {/* Save */}
         <Pressable
           onPress={async () => {
-            const ok = await saveArticle(article);
+            const ok = await saveArticle(data);
             alert(ok ? "Saved ❤️" : "Already Saved ✔");
           }}
           style={{
@@ -99,7 +115,7 @@ export default function ArticleDetailsScreen() {
           <Text style={{ fontSize: 22, color: "#fff" }}>❤️</Text>
         </Pressable>
 
-        {/* Share Button */}
+        {/* Share */}
         <Pressable
           onPress={shareArticle}
           style={{
@@ -114,7 +130,7 @@ export default function ArticleDetailsScreen() {
           <Text style={{ fontSize: 22, color: "#fff" }}>📤</Text>
         </Pressable>
 
-        {/* Back Button */}
+        {/* Back */}
         <Pressable
           onPress={() => {
             stopSpeak();
