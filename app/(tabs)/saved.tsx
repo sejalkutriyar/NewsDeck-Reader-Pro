@@ -27,7 +27,10 @@ export default function SavedScreen() {
 
       <FlatList
         data={savedArticles}
-        keyExtractor={(item, index) => item.article_id || item.id || index.toString()}
+        keyExtractor={(item, index) => {
+          const id = item.article_id || item.id || '';
+          return `saved-${id}-${index}`;
+        }}
         renderItem={({ item }) => (
           <View style={{ marginBottom: 12 }}>
             <ArticleCard
