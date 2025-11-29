@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, Text, Image, ScrollView, Pressable, Share } from "react-native";
+import { View, Text, Image, ScrollView, Pressable, Share, Alert } from "react-native";
 import * as Speech from "expo-speech";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { saveArticle } from "@/utils/storage";
@@ -101,7 +101,11 @@ export default function ArticleDetailsScreen() {
         <Pressable
           onPress={async () => {
             const ok = await saveArticle(data);
-            alert(ok ? "Saved ❤️" : "Already Saved ✔");
+            if (ok) {
+              Alert.alert("Success", "Article saved! ❤️");
+            } else {
+              Alert.alert("Info", "Already saved ✔");
+            }
           }}
           style={{
             width: 55,
