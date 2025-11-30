@@ -1,35 +1,40 @@
 import React, { useEffect } from "react";
 import { View, Text, Image, ScrollView, Pressable, Share, Alert } from "react-native";
-import * as Speech from "expo-speech";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { saveArticle } from "@/utils/storage";
+import * as Speech from "expo-speech";            // 🔊 For Text-to-Speech (TTS)
+import { useLocalSearchParams, useRouter } from "expo-router"; // For getting params + back navigation
+import { saveArticle } from "@/utils/storage";    // ❤️ To save article in AsyncStorage
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ArticleDetailsScreen() {
+  // Article data FeedScreen se params me aa raha hai
   const { article } = useLocalSearchParams();
   const router = useRouter();
 
-  // stop TTS when leaving screen - must be called before early return
+  // Screen se bahar jaate hi TTS ko stop kar dete hain
   useEffect(() => {
     return () => {
       Speech.stop();
     };
   }, []);
 
+  // Agar article nahi mila to message
   if (!article) return <Text>No Article Found</Text>;
 
-  // parse incoming article from FeedScreen
-  const articleStr = typeof article === 'string' ? article : article[0];
+  // Article ko string se object me convert karna
+  const articleStr = typeof article === "string" ? article : article[0];
   const data = JSON.parse(articleStr);
 
+  // Text-to-Speech start function
   const speak = () => {
     Speech.speak(data?.description || "");
   };
 
+  // Text-to-Speech stop function
   const stopSpeak = () => {
     Speech.stop();
   };
 
+  // Share Article
   const shareArticle = async () => {
     try {
       await Share.share({
@@ -42,7 +47,11 @@ export default function ArticleDetailsScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+      
+      {/* Scrollable content */}
       <ScrollView contentContainerStyle={{ padding: 16 }}>
+        
+        {/* Article Image */}
         {data.image_url && (
           <Image
             source={{ uri: data.image_url }}
@@ -55,6 +64,7 @@ export default function ArticleDetailsScreen() {
           />
         )}
 
+        {/* Title */}
         <Text
           style={{
             fontSize: 28,
@@ -66,14 +76,15 @@ export default function ArticleDetailsScreen() {
           {data.title}
         </Text>
 
+        {/* Description */}
         <Text style={{ fontSize: 16, color: "#333", lineHeight: 24 }}>
           {data.description}
         </Text>
 
-        <View style={{ height: 60 }} />
+        <View style={{ height: 60 }} />  {/* Space for floating buttons */}
       </ScrollView>
 
-      {/* Floating Buttons */}
+      {/* Floating action buttons */}
       <View
         style={{
           position: "absolute",
@@ -82,7 +93,7 @@ export default function ArticleDetailsScreen() {
           gap: 12,
         }}
       >
-        {/* Speak */}
+        {/* Speak Button */}
         <Pressable
           onPress={speak}
           style={{
@@ -97,7 +108,7 @@ export default function ArticleDetailsScreen() {
           <Text style={{ fontSize: 22, color: "#fff" }}>🔊</Text>
         </Pressable>
 
-        {/* Save */}
+        {/* Save Button */}
         <Pressable
           onPress={async () => {
             const ok = await saveArticle(data);
@@ -119,7 +130,7 @@ export default function ArticleDetailsScreen() {
           <Text style={{ fontSize: 22, color: "#fff" }}>❤️</Text>
         </Pressable>
 
-        {/* Share */}
+        {/* Share Button */}
         <Pressable
           onPress={shareArticle}
           style={{
@@ -134,11 +145,11 @@ export default function ArticleDetailsScreen() {
           <Text style={{ fontSize: 22, color: "#fff" }}>📤</Text>
         </Pressable>
 
-        {/* Back */}
+        {/* Back Button */}
         <Pressable
           onPress={() => {
-            stopSpeak();
-            router.back();
+            stopSpeak();     // Leaving screen → Stop speaking
+            router.back();   // Go back to previous screen
           }}
           style={{
             width: 55,
