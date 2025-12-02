@@ -4,6 +4,7 @@ import * as Speech from "expo-speech";            // 🔊 For Text-to-Speech (TT
 import { useLocalSearchParams, useRouter } from "expo-router"; // For getting params + back navigation
 import { saveArticle } from "@/utils/storage";    // ❤️ To save article in AsyncStorage
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ArticleStyles } from "@/styles/ArticleStyles";
 
 export default function ArticleDetailsScreen() {
   // Article data FeedScreen se params me aa raha hai
@@ -17,16 +18,58 @@ export default function ArticleDetailsScreen() {
     };
   }, []);
 
-  // Agar article nahi mila to message
-  if (!article) return <Text>No Article Found</Text>;
+  // Safely parse the incoming `article` param. expo-router sometimes passes
+  // a JSON string, an object, or an array containing a JSON string.
+  const parseArticleParam = (param: any) => {
+    try {
+      if (!param) return null;
+      if (typeof param === "string") {
+        // Try parse JSON string, otherwise return as text-only object
+        try {
+          return JSON.parse(param);
+        } catch {
+          return { title: String(param) };
+        }
+      }
+      if (Array.isArray(param)) {
+        if (param.length === 0) return null;
+        const first = param[0];
+        if (typeof first === "string") {
+          try {
+            return JSON.parse(first);
+          } catch {
+            return { title: String(first) };
+          }
+        }
+        return first;
+      }
+      if (typeof param === "object") return param;
+      return null;
+    } catch {
+      return null;
+    }
+  };
 
-  // Article ko string se object me convert karna
-  const articleStr = typeof article === "string" ? article : article[0];
-  const data = JSON.parse(articleStr);
+  const parsed = parseArticleParam(article);
+  // Debug logs to help identify invalid values causing Text rendering errors
 
-  // Text-to-Speech start function
-  const speak = () => {
-    Speech.speak(data?.description || "");
+  if (!parsed) return <Text>{`No Article Found`}</Text>;
+
+  // Normalize fields to strings so Text components never receive undefined/null
+  const toStr = (v: any) => (v === null || v === undefined ? "" : String(v));
+  const data = parsed as Record<string, any>;
+  const title = toStr(data.title ?? data.headline ?? data.name);
+  const description = toStr(
+    data.description ?? data.summary ?? data.content ?? data.desc
+  );
+
+  const imageUrl = toStr(
+    data.image_url ?? data.imageUrl ?? data.image ?? data.thumbnail
+  );
+
+  // Text-to-Speech start function — accepts text to speak
+  const speak = (text?: string) => {
+    Speech.speak(text || "");
   };
 
   // Text-to-Speech stop function
@@ -34,11 +77,11 @@ export default function ArticleDetailsScreen() {
     Speech.stop();
   };
 
-  // Share Article
-  const shareArticle = async () => {
+  // Share Article — accepts title and description
+  const shareArticle = async (title?: string, desc?: string) => {
     try {
       await Share.share({
-        message: `${data?.title}\n\n${data?.description}`,
+        message: `${title || ""}\n\n${desc || ""}`,
       });
     } catch (error) {
       console.log("Share error: ", error);
@@ -46,121 +89,76 @@ export default function ArticleDetailsScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-      
+    <SafeAreaView style={ArticleStyles.safeArea}>
+
       {/* Scrollable content */}
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
-        
+      <ScrollView contentContainerStyle={ArticleStyles.scrollContent}>
+
         {/* Article Image */}
-        {data.image_url && (
+        {imageUrl ? (
           <Image
-            source={{ uri: data.image_url }}
-            style={{
-              width: "100%",
-              height: 250,
-              borderRadius: 12,
-              backgroundColor: "#ccc",
-            }}
+            source={{ uri: imageUrl }}
+            style={ArticleStyles.image}
           />
-        )}
+        ) : null}
 
         {/* Title */}
-        <Text
-          style={{
-            fontSize: 28,
-            fontWeight: "800",
-            marginVertical: 12,
-            color: "#1A1A1A",
-          }}
-        >
-          {data.title}
+        <Text style={ArticleStyles.title}>
+          {`${title}`}
         </Text>
 
         {/* Description */}
-        <Text style={{ fontSize: 16, color: "#333", lineHeight: 24 }}>
-          {data.description}
+        <Text style={ArticleStyles.description}>
+          {`${description}`}
         </Text>
 
-        <View style={{ height: 60 }} />  {/* Space for floating buttons */}
+        {/* Space for floating buttons */}
+        <View style={ArticleStyles.spacer} />
       </ScrollView>
 
       {/* Floating action buttons */}
-      <View
-        style={{
-          position: "absolute",
-          bottom: 25,
-          right: 20,
-          gap: 12,
-        }}
-      >
+      <View style={ArticleStyles.floatingContainer}>
         {/* Speak Button */}
         <Pressable
-          onPress={speak}
-          style={{
-            width: 55,
-            height: 55,
-            borderRadius: 50,
-            backgroundColor: "#007BFF",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+          onPress={() => speak(description)}
+          style={[ArticleStyles.floatingButton, ArticleStyles.speakButton]}
         >
-          <Text style={{ fontSize: 22, color: "#fff" }}>🔊</Text>
+          <Text style={ArticleStyles.buttonText}>{`🔊`}</Text>
         </Pressable>
 
         {/* Save Button */}
         <Pressable
           onPress={async () => {
-            const ok = await saveArticle(data);
+            const ok = await saveArticle(parsed);
             if (ok) {
               Alert.alert("Success", "Article saved! ❤️");
             } else {
               Alert.alert("Info", "Already saved ✔");
             }
           }}
-          style={{
-            width: 55,
-            height: 55,
-            borderRadius: 50,
-            backgroundColor: "crimson",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+          style={[ArticleStyles.floatingButton, ArticleStyles.saveButton]}
         >
-          <Text style={{ fontSize: 22, color: "#fff" }}>❤️</Text>
+          <Text style={ArticleStyles.buttonText}>{`❤️`}</Text>
         </Pressable>
 
         {/* Share Button */}
         <Pressable
-          onPress={shareArticle}
-          style={{
-            width: 55,
-            height: 55,
-            borderRadius: 50,
-            backgroundColor: "#222",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+          onPress={() => shareArticle(title, description)}
+          style={[ArticleStyles.floatingButton, ArticleStyles.shareButton]}
         >
-          <Text style={{ fontSize: 22, color: "#fff" }}>📤</Text>
+          <Text style={ArticleStyles.buttonText}>{`📤`}</Text>
         </Pressable>
 
         {/* Back Button */}
         <Pressable
           onPress={() => {
+            console.log("Navigating back from article");
             stopSpeak();     // Leaving screen → Stop speaking
             router.back();   // Go back to previous screen
           }}
-          style={{
-            width: 55,
-            height: 55,
-            borderRadius: 50,
-            backgroundColor: "#444",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+          style={[ArticleStyles.floatingButton, ArticleStyles.backButton]}
         >
-          <Text style={{ fontSize: 20, color: "#fff" }}>⬅</Text>
+          <Text style={ArticleStyles.backButtonText}>{`⬅`}</Text>
         </Pressable>
       </View>
     </SafeAreaView>

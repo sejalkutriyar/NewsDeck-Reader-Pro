@@ -1,10 +1,11 @@
 import React, { useState, useCallback } from "react";
-import { View, Text, FlatList, StyleSheet, Pressable, Alert } from "react-native";
+import { View, Text, FlatList, Pressable, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import ArticleCard from "../../components/ArticleCard";
 import { getSavedArticles, removeArticle } from "../../utils/storage";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { SavedStyles } from "@/styles/SavedStyles";
 
 export default function SavedScreen() {
   const router = useRouter();
@@ -22,8 +23,8 @@ export default function SavedScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.heading}>❤️ Saved Articles</Text>
+    <SafeAreaView style={SavedStyles.container}>
+      <Text style={SavedStyles.heading}>❤️ Saved Articles</Text>
 
       <FlatList
         data={savedArticles}
@@ -32,16 +33,19 @@ export default function SavedScreen() {
           return `saved-${id}-${index}`;
         }}
         renderItem={({ item }) => (
-          <View style={{ marginBottom: 12 }}>
+          <View style={SavedStyles.itemContainer}>
             <ArticleCard
               title={item.title}
               description={item.description}
               imageUrl={item.image_url || item.imageUrl}
-              onPress={() => router.push({ pathname: '/article/[id]', params: { id: item.article_id || item.id, article: JSON.stringify(item) } })}
+              onPress={() => {
+                console.log("Opening saved article:", item.title);
+                router.push({ pathname: '/article/[id]', params: { id: item.article_id || item.id, article: JSON.stringify(item) } });
+              }}
             />
 
             <Pressable
-              style={styles.deleteBtn}
+              style={SavedStyles.deleteBtn}
               onPress={() =>
                 Alert.alert("Remove", "Delete this saved article?", [
                   { text: "Cancel", style: "cancel" },
@@ -56,44 +60,14 @@ export default function SavedScreen() {
                 ])
               }
             >
-              <Text style={styles.deleteText}>🗑 Remove</Text>
+              <Text style={SavedStyles.deleteText}>🗑 Remove</Text>
             </Pressable>
           </View>
         )}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No Saved Articles Yet 😕</Text>
+          <Text style={SavedStyles.emptyText}>No Saved Articles Yet 😕</Text>
         }
       />
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
-  heading: {
-    fontSize: 26,
-    fontWeight: "700",
-    marginBottom: 16,
-    color: "#2C3E50",
-  },
-  emptyText: {
-    textAlign: "center",
-    marginTop: 40,
-    fontSize: 18,
-    color: "gray",
-  },
-  deleteBtn: {
-    marginTop: 6,
-    backgroundColor: "#e63946",
-    paddingVertical: 10,
-    borderRadius: 6,
-    alignItems: "center",
-  },
-  deleteText: {
-    color: "#fff",
-    fontWeight: "600",
-  },
-});

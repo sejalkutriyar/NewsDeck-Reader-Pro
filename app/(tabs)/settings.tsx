@@ -1,17 +1,22 @@
 import React from "react";
-import { View, Text, Switch, StyleSheet } from "react-native";
+import { View, Text, Switch, Linking, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "@/theme/ThemeContext";
+import { SettingsStyles } from "@/styles/SettingsStyles";
 
 export default function SettingsScreen() {
   const { mode, toggleTheme, theme } = useTheme();
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      <Text style={[styles.heading, { color: theme.text }]}>Settings ⚙️</Text>
+    <SafeAreaView style={[SettingsStyles.container, { backgroundColor: theme.background }]}>
 
-      <View style={styles.row}>
-        <Text style={[styles.label, { color: theme.text }]}>
+      <Text style={[SettingsStyles.heading, { color: theme.text }]}>
+        Settings ⚙️
+      </Text>
+
+      {/* THEME SWITCH */}
+      <View style={SettingsStyles.row}>
+        <Text style={[SettingsStyles.label, { color: theme.text }]}>
           Dark Mode 🌙
         </Text>
         <Switch
@@ -20,29 +25,35 @@ export default function SettingsScreen() {
           trackColor={{ true: "#007BFF", false: "#ccc" }}
         />
       </View>
+
+      {/* ABOUT SECTION */}
+      <Text
+        style={[
+          SettingsStyles.subHeading,
+          { color: theme.text, marginTop: 30 }
+        ]}
+      >
+        About App ℹ️
+      </Text>
+
+      <Text style={[SettingsStyles.aboutText, { color: theme.secondaryText }]}>
+        NewsDeck is a modern React Native news application built using:
+        {"\n"}• Expo Router
+        {"\n"}• Offline Caching
+        {"\n"}• TTS Reader
+        {"\n"}• Theme Switching
+        {"\n"}• Category Filters
+      </Text>
+
+      <Pressable onPress={() => Linking.openURL("mailto:developer@email.com")}>
+        <Text style={[SettingsStyles.link, { color: "#007BFF" }]}>
+          📩 Contact Developer
+        </Text>
+      </Pressable>
+
+      <Text style={[SettingsStyles.version, { color: theme.secondaryText }]}>
+        Version 1.0.0
+      </Text>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  heading: {
-    fontSize: 26,
-    fontWeight: "700",
-    marginBottom: 20,
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-  },
-  label: {
-    fontSize: 18,
-    fontWeight: "500",
-  },
-});

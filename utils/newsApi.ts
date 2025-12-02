@@ -36,7 +36,7 @@ async function cacheFeed(category: string, articles: any[]) {
       [keys.expiryKey, now.toString()],
     ]);
 
-    console.log(`📦 Cached ${category} articles successfully`);
+    console.log(`Cached ${category} articles successfully`);
   } catch (err) {
     console.warn("Cache error:", err);
   }
@@ -58,12 +58,12 @@ async function getCachedFeed(category: string) {
 
     // Cache expired?
     if (now - lastSaved > CACHE_DURATION) {
-      console.log(`⚠ Cache expired for ${category}`);
+      console.log(`Cache expired for ${category}`);
       return null;
     }
 
     const parsed = JSON.parse(data[1]);
-    console.log(`📡 Loaded cached ${category} (${parsed.length} articles)`);
+    console.log(`Loaded cached ${category} (${parsed.length} articles)`);
 
     return parsed;
   } catch (err) {
@@ -83,7 +83,7 @@ async function isRateLimited() {
 
     if (now < reset) {
       const waitSec = Math.ceil((reset - now) / 1000);
-      console.log(`⛔ Rate Limited — wait ${waitSec}s`);
+      console.log(`Rate Limited — wait ${waitSec}s`);
       return true;
     }
 
@@ -99,7 +99,7 @@ async function isRateLimited() {
 async function setRateLimit(waitSeconds = 60) {
   const resetTime = Date.now() + waitSeconds * 1000;
   await AsyncStorage.setItem(RATE_LIMIT_KEY, resetTime.toString());
-  console.log(`⏳ Rate limit set for ${waitSeconds}s`);
+  console.log(`Rate limit set for ${waitSeconds}s`);
 }
 
 // Main API Fetch Function (with category + fallback + cache)
@@ -117,7 +117,7 @@ export async function fetchNews(page = 1, category = "all") {
       url += `&category=${category}`;
     }
 
-    console.log("🌍 Fetching online:", url);
+    console.log("Fetching online:", url);
 
     const response = await axios.get(url, { timeout: 10000 });
     const results = response.data?.results || [];
@@ -144,7 +144,7 @@ export async function fetchNews(page = 1, category = "all") {
     // Handle 422 (Pagination unsupported)
     if (status === 422) {
       try {
-        console.log("⚠ 422 received — retrying without page param");
+        console.log("Pagination limit reached — reloading first page");
 
         let fallbackUrl = BASE_URL;
         if (category !== "all") fallbackUrl += `&category=${category}`;
@@ -163,7 +163,7 @@ export async function fetchNews(page = 1, category = "all") {
     }
 
     // Any other error -> offline mode
-    console.log("❌ API failed — loading cache...");
+    console.log("API failed — loading cache...");
     const cached = await getCachedFeed(category);
     return cached || [];
   }
