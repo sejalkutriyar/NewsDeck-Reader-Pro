@@ -31,4 +31,23 @@ export const SavedStyles = StyleSheet.create({
         color: "#fff",
         fontWeight: "600",
     },
+    header: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 16,
+    },
+    clearAllBtn: {
+        padding: 8,
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 100,
+    },
+    emptyIcon: {
+        fontSize: 60,
+        marginBottom: 16,
+    },
 });

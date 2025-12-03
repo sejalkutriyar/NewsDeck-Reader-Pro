@@ -108,9 +108,20 @@ export default function ArticleDetailsScreen() {
         </Text>
 
         {/* Description */}
+        {/* Description */}
         <Text style={ArticleStyles.description}>
           {`${description}`}
         </Text>
+
+        {/* Offline Content */}
+        {data.offline_content ? (
+          <View style={{ marginTop: 20, padding: 10, backgroundColor: '#f0f0f0', borderRadius: 8 }}>
+            <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>📖 Offline Reading Mode</Text>
+            <Text style={[ArticleStyles.description, { fontSize: 16, lineHeight: 24 }]}>
+              {data.offline_content}
+            </Text>
+          </View>
+        ) : null}
 
         {/* Space for floating buttons */}
         <View style={ArticleStyles.spacer} />

@@ -3,9 +3,11 @@ import { View, Text, FlatList, Pressable, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import ArticleCard from "../../components/ArticleCard";
-import { getSavedArticles, removeArticle } from "../../utils/storage";
+import { getSavedArticles, removeArticle, clearAllArticles } from "../../utils/storage";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SavedStyles } from "@/styles/SavedStyles";
+
+import { Ionicons } from "@expo/vector-icons";
 
 export default function SavedScreen() {
   const router = useRouter();
@@ -22,9 +24,30 @@ export default function SavedScreen() {
     }, [])
   );
 
+  const handleClearAll = () => {
+    Alert.alert("Clear All", "Are you sure you want to delete all saved articles?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Clear All",
+        style: "destructive",
+        onPress: async () => {
+          await clearAllArticles();
+          loadSaved();
+        },
+      },
+    ]);
+  };
+
   return (
     <SafeAreaView style={SavedStyles.container}>
-      <Text style={SavedStyles.heading}>❤️ Saved Articles</Text>
+      <View style={SavedStyles.header}>
+        <Text style={SavedStyles.heading}>❤️ Saved Articles</Text>
+        {savedArticles.length > 0 && (
+          <Pressable onPress={handleClearAll} style={SavedStyles.clearAllBtn}>
+            <Ionicons name="trash-outline" size={24} color="#e63946" />
+          </Pressable>
+        )}
+      </View>
 
       <FlatList
         data={savedArticles}
@@ -65,7 +88,13 @@ export default function SavedScreen() {
           </View>
         )}
         ListEmptyComponent={
-          <Text style={SavedStyles.emptyText}>No Saved Articles Yet 😕</Text>
+          <View style={SavedStyles.emptyContainer}>
+            <Text style={SavedStyles.emptyIcon}>📂</Text>
+            <Text style={SavedStyles.emptyText}>No Saved Articles Yet</Text>
+            <Text style={[SavedStyles.emptyText, { fontSize: 14, marginTop: 8 }]}>
+              Save articles to read them later!
+            </Text>
+          </View>
         }
       />
     </SafeAreaView>

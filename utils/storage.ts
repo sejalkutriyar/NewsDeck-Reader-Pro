@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { downloadArticleContent } from './articleDownloader';
 
 const STORAGE_KEY = 'saved_articles';
 
@@ -22,8 +23,20 @@ export async function saveArticle(article: any) {
       return false; // avoid duplicates
     }
 
-    // Add the article as-is (preserve original structure)
-    existing.push(article);
+    // Download offline content if available
+    let offlineContent = null;
+    if (article.url || article.link) {
+      offlineContent = await downloadArticleContent(article.url || article.link);
+    }
+
+    // Add the article with offline content
+    const articleToSave = {
+      ...article,
+      offline_content: offlineContent,
+      saved_at: new Date().toISOString(),
+    };
+
+    existing.push(articleToSave);
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
     console.log("Article saved:", articleId);
     return true;
@@ -50,14 +63,23 @@ export async function removeArticle(id: string | number) {
   try {
     const stored = await AsyncStorage.getItem(STORAGE_KEY);
     const existing = stored ? JSON.parse(stored) : [];
-    
+
     const idToRemove = String(id);
     const filtered = existing.filter((item: any) => getArticleId(item) !== idToRemove);
-    
+
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
     console.log("Article removed:", idToRemove);
   } catch (err) {
     console.log("Remove Error: ", err);
+  }
+}
+
+export async function clearAllArticles() {
+  try {
+    await AsyncStorage.removeItem(STORAGE_KEY);
+    console.log("All articles cleared");
+  } catch (err) {
+    console.log("Clear All Error: ", err);
   }
 }
 
