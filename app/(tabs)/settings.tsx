@@ -5,7 +5,7 @@ import { useTheme } from "@/theme/ThemeContext";
 import { SettingsStyles } from "@/styles/SettingsStyles";
 
 export default function SettingsScreen() {
-  const { mode, toggleTheme, theme } = useTheme();
+  const { mode, toggleTheme, theme, fontSize, setFontSize } = useTheme();
 
   return (
     <SafeAreaView style={[SettingsStyles.container, { backgroundColor: theme.background }]}>
@@ -24,6 +24,50 @@ export default function SettingsScreen() {
           onValueChange={toggleTheme}
           trackColor={{ true: "#007BFF", false: "#ccc" }}
         />
+      </View>
+
+      {/* FONT SIZE SELECTOR */}
+      <View style={[SettingsStyles.row, { marginTop: 20 }]}>
+        <Text style={[SettingsStyles.label, { color: theme.text }]}>
+          Font Size 🔠
+        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
+          <Pressable
+            onPress={() => setFontSize(Math.max(12, fontSize - 2))}
+            style={{
+              width: 40,
+              height: 40,
+              backgroundColor: theme.card,
+              borderRadius: 20,
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderWidth: 1,
+              borderColor: theme.secondaryText
+            }}
+          >
+            <Text style={{ fontSize: 24, color: theme.text, lineHeight: 28 }}>-</Text>
+          </Pressable>
+
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme.text, minWidth: 30, textAlign: 'center' }}>
+            {fontSize}
+          </Text>
+
+          <Pressable
+            onPress={() => setFontSize(Math.min(30, fontSize + 2))}
+            style={{
+              width: 40,
+              height: 40,
+              backgroundColor: theme.card,
+              borderRadius: 20,
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderWidth: 1,
+              borderColor: theme.secondaryText
+            }}
+          >
+            <Text style={{ fontSize: 24, color: theme.text, lineHeight: 28 }}>+</Text>
+          </Pressable>
+        </View>
       </View>
 
       {/* ABOUT SECTION */}

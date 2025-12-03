@@ -5,6 +5,7 @@ import { useLocalSearchParams, useRouter } from "expo-router"; // For getting pa
 import { saveArticle } from "@/utils/storage";    // ❤️ To save article in AsyncStorage
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ArticleStyles } from "@/styles/ArticleStyles";
+import { useTheme } from "@/theme/ThemeContext";
 
 export default function ArticleDetailsScreen() {
   // Article data FeedScreen se params me aa raha hai
@@ -88,6 +89,15 @@ export default function ArticleDetailsScreen() {
     }
   };
 
+  const { theme, fontSize } = useTheme();
+
+  const getFontSize = (baseSize: number) => {
+    // baseSize is assumed to be designed for "16px" standard
+    // scale = current / 16
+    const scale = fontSize / 16;
+    return baseSize * scale;
+  };
+
   return (
     <SafeAreaView style={ArticleStyles.safeArea}>
 
@@ -102,22 +112,25 @@ export default function ArticleDetailsScreen() {
           />
         ) : null}
 
+
+
+
+
         {/* Title */}
-        <Text style={ArticleStyles.title}>
+        <Text style={[ArticleStyles.title, { fontSize: getFontSize(24), lineHeight: getFontSize(32) }]}>
           {`${title}`}
         </Text>
 
         {/* Description */}
-        {/* Description */}
-        <Text style={ArticleStyles.description}>
+        <Text style={[ArticleStyles.description, { fontSize: getFontSize(16), lineHeight: getFontSize(24) }]}>
           {`${description}`}
         </Text>
 
         {/* Offline Content */}
         {data.offline_content ? (
           <View style={{ marginTop: 20, padding: 10, backgroundColor: '#f0f0f0', borderRadius: 8 }}>
-            <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>📖 Offline Reading Mode</Text>
-            <Text style={[ArticleStyles.description, { fontSize: 16, lineHeight: 24 }]}>
+            <Text style={{ fontWeight: 'bold', marginBottom: 8, fontSize: getFontSize(16) }}>📖 Offline Reading Mode</Text>
+            <Text style={[ArticleStyles.description, { fontSize: getFontSize(16), lineHeight: getFontSize(24) }]}>
               {data.offline_content}
             </Text>
           </View>

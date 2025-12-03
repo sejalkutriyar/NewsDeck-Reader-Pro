@@ -4,13 +4,13 @@ import {
   Text,
   ActivityIndicator,
   View,
-  TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/theme/ThemeContext";
 
 import ArticleCard from "@/components/ArticleCard";
+import CategoryPill from "@/components/CategoryPill";
 import SearchBar from "@/components/SearchBar";
 import { fetchNews } from "@/utils/newsApi";
 import { FeedStyles } from "@/styles/FeedStyles";
@@ -137,28 +137,13 @@ export default function FeedScreen() {
           data={CATEGORIES}
           keyExtractor={(item) => item.key}
           renderItem={({ item }) => (
-            <TouchableOpacity
+            <CategoryPill
+              name={item.name}
+              isSelected={category === item.key}
               onPress={() => setCategory(item.key)}
-              style={[
-                FeedStyles.categoryButton,
-                {
-                  backgroundColor:
-                    category === item.key ? safeTheme.primary : safeTheme.card,
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  FeedStyles.categoryText,
-                  {
-                    color: category === item.key ? "#fff" : safeTheme.text,
-                  }
-                ]}
-              >
-                {item.name}
-              </Text>
-            </TouchableOpacity>
+            />
           )}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 10 }}
         />
       </View>
 

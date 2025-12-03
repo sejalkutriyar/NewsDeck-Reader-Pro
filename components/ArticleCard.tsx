@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text, Image, Pressable, StyleSheet } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { View, Text, Image, Pressable, Animated, StyleSheet } from "react-native";
 import { useTheme } from "@/theme/ThemeContext";
 
 interface ArticleCardProps {
@@ -16,6 +16,23 @@ export default function ArticleCard({
   onPress,
 }: ArticleCardProps) {
   const { theme } = useTheme();
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
   const safeDescription = String(description || "");
   const preview =
@@ -24,23 +41,31 @@ export default function ArticleCard({
       : safeDescription;
 
   return (
-    <Pressable
-      style={[styles.card, { backgroundColor: theme.card }]}
-      onPress={onPress}
+    <Animated.View
+      style={[
+        styles.card,
+        {
+          backgroundColor: theme.card,
+          opacity: fadeAnim,
+          transform: [{ translateY: slideAnim }],
+        },
+      ]}
     >
-      {imageUrl && (
-        <Image source={{ uri: imageUrl }} style={styles.image} />
-      )}
+      <Pressable onPress={onPress}>
+        {imageUrl && (
+          <Image source={{ uri: imageUrl }} style={styles.image} />
+        )}
 
-      <View style={styles.content}>
-        <Text style={[styles.title, { color: theme.text }]}>
-          {title}
-        </Text>
-        <Text style={[styles.desc, { color: theme.secondaryText }]}>
-          {preview}
-        </Text>
-      </View>
-    </Pressable>
+        <View style={styles.content}>
+          <Text style={[styles.title, { color: theme.text }]}>
+            {title}
+          </Text>
+          <Text style={[styles.desc, { color: theme.secondaryText }]}>
+            {preview}
+          </Text>
+        </View>
+      </Pressable>
+    </Animated.View>
   );
 }
 

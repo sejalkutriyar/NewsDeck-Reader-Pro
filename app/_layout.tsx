@@ -12,10 +12,24 @@ function NavigationStack() {
 
       <Stack screenOptions={{ headerShown: false }}>
         {/* Tabs group */}
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="(tabs)"
+          options={{
+            headerShown: false,
+            animation: "fade",
+          }}
+        />
 
         {/* Article details screen */}
-        <Stack.Screen name="article/[id]" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="article/[id]"
+          options={{
+            headerShown: false,
+            animation: "slide_from_right",
+            presentation: "card",
+            animationDuration: 400,
+          }}
+        />
       </Stack>
     </>
   );

@@ -23,26 +23,48 @@ export async function saveArticle(article: any) {
       return false; // avoid duplicates
     }
 
-    // Download offline content if available
-    let offlineContent = null;
-    if (article.url || article.link) {
-      offlineContent = await downloadArticleContent(article.url || article.link);
-    }
-
-    // Add the article with offline content
+    // 1. Save immediately without offline content
     const articleToSave = {
       ...article,
-      offline_content: offlineContent,
+      offline_content: null, // initially null
       saved_at: new Date().toISOString(),
     };
 
     existing.push(articleToSave);
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
-    console.log("Article saved:", articleId);
+    console.log("Article saved (initial):", articleId);
+
+    // 2. Trigger background download and update
+    // We do NOT await this, so the UI gets immediate feedback
+    downloadAndSaveContent(articleId, article.url || article.link);
+
     return true;
   } catch (err) {
     console.log("Save Error: ", err);
     return false;
+  }
+}
+
+// Helper to download and update storage in the background
+async function downloadAndSaveContent(id: string, url: string) {
+  if (!url) return;
+  try {
+    console.log("Starting background download for:", id);
+    const content = await downloadArticleContent(url);
+    if (!content) return;
+
+    // Re-read storage to ensure we don't overwrite other changes
+    const stored = await AsyncStorage.getItem(STORAGE_KEY);
+    let currentArticles = stored ? JSON.parse(stored) : [];
+
+    const index = currentArticles.findIndex((item: any) => getArticleId(item) === id);
+    if (index !== -1) {
+      currentArticles[index].offline_content = content;
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(currentArticles));
+      console.log("Background download completed for:", id);
+    }
+  } catch (err) {
+    console.log("Background download failed:", err);
   }
 }
 
