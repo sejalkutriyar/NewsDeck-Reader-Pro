@@ -1,4 +1,5 @@
-// app/index.tsx
-export { default } from "./(tabs)/index";
+import { Redirect } from "expo-router";
 
-// Re-exporting the main feed screen from the tabs directory
+export default function Index() {
+  return <Redirect href="/(tabs)" />;
+}

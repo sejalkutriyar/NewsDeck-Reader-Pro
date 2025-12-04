@@ -1,8 +1,8 @@
-import React, { useEffect } from "react";
-import { View, Text, Image, ScrollView, Pressable, Share, Alert } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, Image, ScrollView, Pressable, Share, Alert, Platform } from "react-native";
 import * as Speech from "expo-speech";            // 🔊 For Text-to-Speech (TTS)
 import { useLocalSearchParams, useRouter } from "expo-router"; // For getting params + back navigation
-import { saveArticle } from "@/utils/storage";    // ❤️ To save article in AsyncStorage
+import { saveArticle, getSavedArticle } from "@/utils/storage";    // ❤️ To save article in AsyncStorage
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ArticleStyles } from "@/styles/ArticleStyles";
 import { useTheme } from "@/theme/ThemeContext";
@@ -52,13 +52,30 @@ export default function ArticleDetailsScreen() {
   };
 
   const parsed = parseArticleParam(article);
+  const [articleData, setArticleData] = useState<any>(parsed);
+  const [imageError, setImageError] = useState(false);
+
+  useEffect(() => {
+    if (parsed) {
+      setArticleData(parsed);
+      const id = parsed.article_id || parsed.id;
+      if (id) {
+        getSavedArticle(String(id)).then((saved) => {
+          if (saved) {
+            setArticleData((prev: any) => ({ ...prev, ...saved }));
+          }
+        });
+      }
+    }
+  }, [article]);
+
   // Debug logs to help identify invalid values causing Text rendering errors
 
-  if (!parsed) return <Text>{`No Article Found`}</Text>;
+  if (!articleData) return <Text>{`No Article Found`}</Text>;
 
   // Normalize fields to strings so Text components never receive undefined/null
   const toStr = (v: any) => (v === null || v === undefined ? "" : String(v));
-  const data = parsed as Record<string, any>;
+  const data = articleData as Record<string, any>;
   const title = toStr(data.title ?? data.headline ?? data.name);
   const description = toStr(
     data.description ?? data.summary ?? data.content ?? data.desc
@@ -124,12 +141,17 @@ export default function ArticleDetailsScreen() {
       <ScrollView contentContainerStyle={ArticleStyles.scrollContent}>
 
         {/* Article Image */}
-        {imageUrl ? (
+        {imageUrl && !imageError ? (
           <Image
             source={{ uri: imageUrl }}
             style={ArticleStyles.image}
+            onError={() => setImageError(true)}
           />
-        ) : null}
+        ) : (
+          <View style={[ArticleStyles.image, { backgroundColor: '#ccc', justifyContent: 'center', alignItems: 'center' }]}>
+            <Text style={{ fontSize: 60 }}>📰</Text>
+          </View>
+        )}
 
 
 
@@ -172,11 +194,19 @@ export default function ArticleDetailsScreen() {
         {/* Save Button */}
         <Pressable
           onPress={async () => {
-            const ok = await saveArticle(parsed);
+            const ok = await saveArticle(articleData);
             if (ok) {
-              Alert.alert("Success", "Article saved! ❤️");
+              if (Platform.OS === 'web') {
+                window.alert("Article saved! ❤️");
+              } else {
+                Alert.alert("Success", "Article saved! ❤️");
+              }
             } else {
-              Alert.alert("Info", "Already saved ✔");
+              if (Platform.OS === 'web') {
+                window.alert("Already saved ✔");
+              } else {
+                Alert.alert("Info", "Already saved ✔");
+              }
             }
           }}
           style={[ArticleStyles.floatingButton, ArticleStyles.saveButton]}
@@ -196,6 +226,11 @@ export default function ArticleDetailsScreen() {
         <Pressable
           onPress={() => {
             console.log("Navigating back from article");
+            if (Platform.OS === 'web') {
+              // Blur the active element to prevent "aria-hidden" warnings
+              // when the screen transitions out while an element still has focus.
+              (document.activeElement as HTMLElement)?.blur();
+            }
             stopSpeak();     // Leaving screen → Stop speaking
             router.back();   // Go back to previous screen
           }}

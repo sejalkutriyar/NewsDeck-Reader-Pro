@@ -8,11 +8,17 @@ export async function downloadArticleContent(url: string): Promise<string | null
 
         // Note: On Web, this will likely fail due to CORS unless the server allows it.
         // On Native, this should work for most static sites.
-        const response = await fetch(url);
+        let fetchUrl = url;
+        if (Platform.OS === 'web') {
+            // Use CodeTabs proxy as fallback for others
+            fetchUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`;
+        }
+
+        const response = await fetch(fetchUrl);
 
         if (!response.ok) {
-            console.log(`Failed to fetch article: ${response.status}`);
-            return null;
+            console.log(`Failed to fetch article: ${response.status} ${response.statusText}`);
+            return "Offline content unavailable (Network/CORS error).";
         }
 
         const html = await response.text();

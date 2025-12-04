@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { View, Text, FlatList, Pressable, Alert } from "react-native";
+import { View, Text, FlatList, Pressable, Alert, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import ArticleCard from "../../components/ArticleCard";
@@ -25,17 +25,23 @@ export default function SavedScreen() {
   );
 
   const handleClearAll = () => {
-    Alert.alert("Clear All", "Are you sure you want to delete all saved articles?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Clear All",
-        style: "destructive",
-        onPress: async () => {
-          await clearAllArticles();
-          loadSaved();
+    if (Platform.OS === 'web') {
+      if (window.confirm("Are you sure you want to delete all saved articles?")) {
+        clearAllArticles().then(() => loadSaved());
+      }
+    } else {
+      Alert.alert("Clear All", "Are you sure you want to delete all saved articles?", [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Clear All",
+          style: "destructive",
+          onPress: async () => {
+            await clearAllArticles();
+            loadSaved();
+          },
         },
-      },
-    ]);
+      ]);
+    }
   };
 
   return (
@@ -69,19 +75,25 @@ export default function SavedScreen() {
 
             <Pressable
               style={SavedStyles.deleteBtn}
-              onPress={() =>
-                Alert.alert("Remove", "Delete this saved article?", [
-                  { text: "Cancel", style: "cancel" },
-                  {
-                    text: "Remove",
-                    style: "destructive",
-                    onPress: async () => {
-                      await removeArticle(item.article_id || item.id);
-                      loadSaved();
+              onPress={() => {
+                if (Platform.OS === 'web') {
+                  if (window.confirm("Delete this saved article?")) {
+                    removeArticle(item.article_id || item.id).then(() => loadSaved());
+                  }
+                } else {
+                  Alert.alert("Remove", "Delete this saved article?", [
+                    { text: "Cancel", style: "cancel" },
+                    {
+                      text: "Remove",
+                      style: "destructive",
+                      onPress: async () => {
+                        await removeArticle(item.article_id || item.id);
+                        loadSaved();
+                      },
                     },
-                  },
-                ])
-              }
+                  ]);
+                }
+              }}
             >
               <Text style={SavedStyles.deleteText}>🗑 Remove</Text>
             </Pressable>

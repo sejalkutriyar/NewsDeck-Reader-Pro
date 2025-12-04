@@ -15,9 +15,18 @@ export default function ArticleCard({
   imageUrl,
   onPress,
 }: ArticleCardProps) {
+  const handlePress = () => {
+    if (Platform.OS === 'web') {
+      // Blur the active element to prevent "aria-hidden" warnings when navigating away
+      (document.activeElement as HTMLElement)?.blur();
+    }
+    onPress?.();
+  };
   const { theme } = useTheme();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
+
+  const [imageError, setImageError] = React.useState(false);
 
   useEffect(() => {
     Animated.parallel([
@@ -51,13 +60,20 @@ export default function ArticleCard({
         },
       ]}
     >
-      <Pressable onPress={onPress}>
-        {imageUrl && (
+      <Pressable onPress={handlePress}>
+        {imageUrl && !imageError ? (
           <Image
             source={{ uri: imageUrl }}
             style={styles.image}
-            onError={(e) => console.log("Image load error:", e.nativeEvent.error)}
+            onError={(e) => {
+              console.log("Image load error:", e.nativeEvent.error);
+              setImageError(true);
+            }}
           />
+        ) : (
+          <View style={[styles.image, { backgroundColor: '#ccc', justifyContent: 'center', alignItems: 'center' }]}>
+            <Text style={{ fontSize: 40 }}>📰</Text>
+          </View>
         )}
 
         <View style={styles.content}>

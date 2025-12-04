@@ -81,6 +81,16 @@ export async function getSavedArticles() {
   }
 }
 
+export async function getSavedArticle(id: string) {
+  try {
+    const articles = await getSavedArticles();
+    return articles.find((item: any) => getArticleId(item) === id) || null;
+  } catch (err) {
+    console.log("Get Single Saved Error: ", err);
+    return null;
+  }
+}
+
 export async function removeArticle(id: string | number) {
   try {
     const stored = await AsyncStorage.getItem(STORAGE_KEY);

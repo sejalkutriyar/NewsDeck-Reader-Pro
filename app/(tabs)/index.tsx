@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useState } from "react";
-import {FlatList, Text, ActivityIndicator, View} from "react-native";
+import { FlatList, Text, ActivityIndicator, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/theme/ThemeContext";
@@ -58,7 +58,7 @@ export default function FeedScreen() {
   const loadNews = useCallback(
     async (pageToLoad = 1, replace = false) => {
       try {
-        if (pageToLoad === 1 && !replace) setLoading(true);
+        if (pageToLoad === 1) setLoading(true);
         if (pageToLoad > 1) setLoadingMore(true);
 
         const items = await fetchNews(pageToLoad, category);
