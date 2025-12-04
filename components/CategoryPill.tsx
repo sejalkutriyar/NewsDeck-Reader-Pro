@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Text, Pressable, Animated, StyleSheet } from "react-native";
+import { Text, Pressable, Animated, StyleSheet, Platform } from "react-native";
 import { useTheme } from "@/theme/ThemeContext";
 
 interface CategoryPillProps {
@@ -16,7 +16,7 @@ export default function CategoryPill({ name, isSelected, onPress }: CategoryPill
         Animated.spring(scaleAnim, {
             toValue: isSelected ? 1.1 : 1,
             friction: 5,
-            useNativeDriver: true,
+            useNativeDriver: Platform.OS !== 'web',
         }).start();
     }, [isSelected]);
 
@@ -53,10 +53,17 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: "transparent", // or theme.border
         elevation: 2,
-        shadowColor: "#000",
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        shadowOffset: { width: 0, height: 1 },
+        ...Platform.select({
+            web: {
+                boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.1)',
+            },
+            default: {
+                shadowColor: "#000",
+                shadowOpacity: 0.1,
+                shadowRadius: 2,
+                shadowOffset: { width: 0, height: 1 },
+            }
+        }),
     },
     text: {
         fontWeight: "600",

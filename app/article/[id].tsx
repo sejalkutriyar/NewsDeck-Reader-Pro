@@ -69,8 +69,27 @@ export default function ArticleDetailsScreen() {
   );
 
   // Text-to-Speech start function — accepts text to speak
+  // Text-to-Speech start function — accepts text to speak
   const speak = (text?: string) => {
-    Speech.speak(text || "");
+    const content = text || "";
+    const MAX_LENGTH = 3000; // Safe limit below 4000
+
+    if (content.length <= MAX_LENGTH) {
+      Speech.speak(content);
+    } else {
+      // Chunk the text
+      const chunks = [];
+      let i = 0;
+      while (i < content.length) {
+        chunks.push(content.slice(i, i + MAX_LENGTH));
+        i += MAX_LENGTH;
+      }
+
+      // Speak chunks sequentially
+      chunks.forEach((chunk) => {
+        Speech.speak(chunk);
+      });
+    }
   };
 
   // Text-to-Speech stop function

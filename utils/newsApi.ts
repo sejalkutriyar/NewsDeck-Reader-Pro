@@ -112,7 +112,13 @@ export async function fetchNews(page = 1, category = "all") {
 
   try {
     // Build request URL
-    let url = `${BASE_URL}&page=${page}`;
+    let url = `${BASE_URL}`;
+
+    // Only append page if it's not the first page (and ensure it's valid)
+    if (page !== 1) {
+      url += `&page=${page}`;
+    }
+
     if (category !== "all") {
       url += `&category=${category}`;
     }

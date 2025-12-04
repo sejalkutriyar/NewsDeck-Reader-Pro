@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { View, Text, Image, Pressable, Animated, StyleSheet } from "react-native";
+import { View, Text, Image, Pressable, Animated, StyleSheet, Platform } from "react-native";
 import { useTheme } from "@/theme/ThemeContext";
 
 interface ArticleCardProps {
@@ -24,12 +24,12 @@ export default function ArticleCard({
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 500,
-        useNativeDriver: true,
+        useNativeDriver: Platform.OS !== 'web',
       }),
       Animated.timing(slideAnim, {
         toValue: 0,
         duration: 500,
-        useNativeDriver: true,
+        useNativeDriver: Platform.OS !== 'web',
       }),
     ]).start();
   }, []);
@@ -53,7 +53,11 @@ export default function ArticleCard({
     >
       <Pressable onPress={onPress}>
         {imageUrl && (
-          <Image source={{ uri: imageUrl }} style={styles.image} />
+          <Image
+            source={{ uri: imageUrl }}
+            style={styles.image}
+            onError={(e) => console.log("Image load error:", e.nativeEvent.error)}
+          />
         )}
 
         <View style={styles.content}>
@@ -75,9 +79,17 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     marginBottom: 16,
     elevation: 4,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
+    ...Platform.select({
+      web: {
+        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2)',
+      },
+      default: {
+        shadowColor: "#000",
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 2 },
+      }
+    }),
   },
   image: {
     width: "100%",

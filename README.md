@@ -1,50 +1,62 @@
-# Welcome to your Expo app 👋
+# NewsProject
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A modern, feature-rich news reader application built with React Native and Expo. Stay updated with the latest headlines from around the world, categorized for your convenience.
 
-## Get started
+## Features
 
-1. Install dependencies
+- **Top Headlines**: Get the latest news from various categories like Business, Technology, Sports, and more.
+- **Search Functionality**: Easily find articles on specific topics.
+- **Categories**: Browse news by specific interests.
+- **Offline Reading**: Cached news feed allows reading even when offline.
+- **Save Articles**: Bookmark your favorite articles to read later.
+- **Smooth Animations**: Enjoy a polished user experience with fluid transitions and interactions.
 
-   ```bash
-   npm install
-   ```
+## Tech Stack
 
-2. Start the app
+- **Framework**: [Expo](https://expo.dev/) (React Native)
+- **Navigation**: [Expo Router](https://docs.expo.dev/router/introduction/)
+- **Styling**: StyleSheet (React Native)
+- **API**: [NewsData.io](https://newsdata.io/)
+- **State Management**: React Context (for Bookmarks)
+- **Storage**: AsyncStorage (for Caching & Bookmarks)
 
-   ```bash
-   npx expo start
-   ```
+## Getting Started
 
-In the output, you'll find options to open the app in a
+### Prerequisites
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- Node.js installed
+- Expo Go app on your mobile device (iOS/Android) or an emulator.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### Installation
 
-## Get a fresh project
+1.  Clone the repository:
+    ```bash
+    git clone https://github.com/sejalkutriyar/NewsDeck-Reader-Pro.git
+    ```
+2.  Navigate to the project directory:
+    ```bash
+    cd NewsProject
+    ```
+3.  Install dependencies:
+    ```bash
+    npm install
+    ```
 
-When you're ready, run:
+### Running the App
 
-```bash
-npm run reset-project
-```
+1.  Start the development server:
+    ```bash
+    npx expo start
+    ```
+2.  Scan the QR code with the Expo Go app (Android) or Camera app (iOS).
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Project Structure
 
-## Learn more
+- **app/**: Contains the main application screens and navigation logic (Expo Router).
+- **components/**: Reusable UI components like `ArticleCard`, `SearchBar`, etc.
+- **utils/**: Utility functions for API calls, storage, and data management.
+- **assets/**: Images and other static assets.
 
-To learn more about developing your project with Expo, look at the following resources:
+## License
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+This project is licensed under the MIT License.
