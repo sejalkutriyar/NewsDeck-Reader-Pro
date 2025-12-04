@@ -1,10 +1,5 @@
 import React, { useEffect, useCallback, useState } from "react";
-import {
-  FlatList,
-  Text,
-  ActivityIndicator,
-  View,
-} from "react-native";
+import {FlatList, Text, ActivityIndicator, View} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/theme/ThemeContext";
@@ -163,6 +158,7 @@ export default function FeedScreen() {
           )}
 
           <FlatList
+            style={{ flex: 1 }}
             data={filtered}
             keyExtractor={(item, index) => `${item.article_id ?? item.title}-${index}`}
             renderItem={({ item }) => (
