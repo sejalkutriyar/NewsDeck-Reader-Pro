@@ -1,23 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Image, ScrollView, Pressable, Share, Alert, Platform } from "react-native";
-import * as Speech from "expo-speech";            // 🔊 For Text-to-Speech (TTS)
 import { useLocalSearchParams, useRouter } from "expo-router"; // For getting params + back navigation
+import * as Linking from 'expo-linking';
 import { saveArticle, getSavedArticle } from "@/utils/storage";    // ❤️ To save article in AsyncStorage
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ArticleStyles } from "@/styles/ArticleStyles";
 import { useTheme } from "@/theme/ThemeContext";
+import { useTTS } from "@/utils/TTSContext";
+import { SharePreviewModal } from "@/components/SharePreviewModal";
 
 export default function ArticleDetailsScreen() {
   // Article data FeedScreen se params me aa raha hai
   const { article } = useLocalSearchParams();
   const router = useRouter();
-
-  // Screen se bahar jaate hi TTS ko stop kar dete hain
-  useEffect(() => {
-    return () => {
-      Speech.stop();
-    };
-  }, []);
+  const { play, addToQueue } = useTTS();
+  const [shareModalVisible, setShareModalVisible] = useState(false);
 
   // Safely parse the incoming `article` param. expo-router sometimes passes
   // a JSON string, an object, or an array containing a JSON string.
@@ -85,40 +82,15 @@ export default function ArticleDetailsScreen() {
     data.image_url ?? data.imageUrl ?? data.image ?? data.thumbnail
   );
 
-  // Text-to-Speech start function — accepts text to speak
-  // Text-to-Speech start function — accepts text to speak
-  const speak = (text?: string) => {
-    const content = text || "";
-    const MAX_LENGTH = 3000; // Safe limit below 4000
-
-    if (content.length <= MAX_LENGTH) {
-      Speech.speak(content);
-    } else {
-      // Chunk the text
-      const chunks = [];
-      let i = 0;
-      while (i < content.length) {
-        chunks.push(content.slice(i, i + MAX_LENGTH));
-        i += MAX_LENGTH;
-      }
-
-      // Speak chunks sequentially
-      chunks.forEach((chunk) => {
-        Speech.speak(chunk);
-      });
-    }
-  };
-
-  // Text-to-Speech stop function
-  const stopSpeak = () => {
-    Speech.stop();
-  };
-
   // Share Article — accepts title and description
   const shareArticle = async (title?: string, desc?: string) => {
     try {
+      // Create a deep link to this article
+      const id = data.article_id || data.id;
+      const link = Linking.createURL(`article/${id}`);
+
       await Share.share({
-        message: `${title || ""}\n\n${desc || ""}`,
+        message: `${title || ""}\n\n${desc || ""}\n\nRead more: ${link}`,
       });
     } catch (error) {
       console.log("Share error: ", error);
@@ -136,6 +108,11 @@ export default function ArticleDetailsScreen() {
 
   return (
     <SafeAreaView style={ArticleStyles.safeArea}>
+      <SharePreviewModal
+        visible={shareModalVisible}
+        onClose={() => setShareModalVisible(false)}
+        article={articleData}
+      />
 
       {/* Scrollable content */}
       <ScrollView contentContainerStyle={ArticleStyles.scrollContent}>
@@ -152,10 +129,6 @@ export default function ArticleDetailsScreen() {
             <Text style={{ fontSize: 60 }}>📰</Text>
           </View>
         )}
-
-
-
-
 
         {/* Title */}
         <Text style={[ArticleStyles.title, { fontSize: getFontSize(24), lineHeight: getFontSize(32) }]}>
@@ -183,12 +156,27 @@ export default function ArticleDetailsScreen() {
 
       {/* Floating action buttons */}
       <View style={ArticleStyles.floatingContainer}>
-        {/* Speak Button */}
+        {/* Play Button */}
         <Pressable
-          onPress={() => speak(description)}
+          onPress={() => play(articleData)}
           style={[ArticleStyles.floatingButton, ArticleStyles.speakButton]}
         >
-          <Text style={ArticleStyles.buttonText}>{`🔊`}</Text>
+          <Text style={ArticleStyles.buttonText}>{`▶️`}</Text>
+        </Pressable>
+
+        {/* Queue Button */}
+        <Pressable
+          onPress={() => {
+            addToQueue(articleData);
+            if (Platform.OS === 'web') {
+              window.alert("Added to queue 🎵");
+            } else {
+              Alert.alert("Added to queue 🎵");
+            }
+          }}
+          style={[ArticleStyles.floatingButton, { backgroundColor: '#9C27B0' }]}
+        >
+          <Text style={ArticleStyles.buttonText}>{`➕`}</Text>
         </Pressable>
 
         {/* Save Button */}
@@ -214,12 +202,20 @@ export default function ArticleDetailsScreen() {
           <Text style={ArticleStyles.buttonText}>{`❤️`}</Text>
         </Pressable>
 
-        {/* Share Button */}
+        {/* Share Image Button */}
+        <Pressable
+          onPress={() => setShareModalVisible(true)}
+          style={[ArticleStyles.floatingButton, { backgroundColor: '#FF9800' }]}
+        >
+          <Text style={ArticleStyles.buttonText}>{`📸`}</Text>
+        </Pressable>
+
+        {/* Share Link Button */}
         <Pressable
           onPress={() => shareArticle(title, description)}
           style={[ArticleStyles.floatingButton, ArticleStyles.shareButton]}
         >
-          <Text style={ArticleStyles.buttonText}>{`📤`}</Text>
+          <Text style={ArticleStyles.buttonText}>{`🔗`}</Text>
         </Pressable>
 
         {/* Back Button */}
@@ -231,7 +227,7 @@ export default function ArticleDetailsScreen() {
               // when the screen transitions out while an element still has focus.
               (document.activeElement as HTMLElement)?.blur();
             }
-            stopSpeak();     // Leaving screen → Stop speaking
+            // stopSpeak(); // Don't stop on back, let it play!
             router.back();   // Go back to previous screen
           }}
           style={[ArticleStyles.floatingButton, ArticleStyles.backButton]}

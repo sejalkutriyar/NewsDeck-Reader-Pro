@@ -2,6 +2,8 @@
 import { Stack } from "expo-router";
 import { ThemeProvider, useTheme } from "../theme/ThemeContext";
 import { StatusBar } from "expo-status-bar";
+import { TTSProvider } from "@/utils/TTSContext";
+import { MiniPlayer } from "@/components/MiniPlayer";
 
 function NavigationStack() {
   const { mode } = useTheme(); // for dynamic status bar style
@@ -38,7 +40,10 @@ function NavigationStack() {
 export default function RootLayout() {
   return (
     <ThemeProvider>
-      <NavigationStack />
+      <TTSProvider>
+        <NavigationStack />
+        <MiniPlayer />
+      </TTSProvider>
     </ThemeProvider>
   );
 }
